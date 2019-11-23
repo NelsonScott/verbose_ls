@@ -26,7 +26,7 @@ def main():
     readable_file_name(one_line[-1])
 
     file_type = one_line[0][0]
-    readable_file_desc(file_type)
+    readable_file_type(file_type)
 
     owner_perms = one_line[0][1:4]
     readable_owner_perms(owner_perms)
@@ -56,7 +56,7 @@ def readable_file_name(filename):
     readable_string += "Filname: {} | ".format(filename)
 
 
-def readable_file_desc(file_type_code):
+def readable_file_type(file_type_code):
     global readable_string
 
     readable_string += decode_file_type[file_type_code]
