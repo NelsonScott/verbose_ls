@@ -2,143 +2,80 @@
 
 from subprocess import check_output
 
-decode_file_type = {
-    '-': 'Regular file',
-    'd': 'Directory',
-    'l': 'Symlink'
-}
 
-decode_file_perm = {
-    'r': 'Read',
-    'w': 'Write',
-    'x': 'Execute'
-}
+class LSFormatter:
+    """Formats ls command into verbose, human readable output."""
 
-readable_string = ""
+    code_to_file_permission = {
+        'r': 'Read',
+        'w': 'Write',
+        'x': 'Execute'
+    }
+    code_to_file_type = {
+        '-': 'Regular file',
+        'd': 'Directory',
+        'l': 'Symlink'
+    }
 
-def main():
-    one_line = [x.split() for x in check_output(['ls', '-lh']).decode().split("\n")][1]
+    def __init__(self):
+        self.verbose_ls_output = []
+        self.get_ls_output()
 
-    print("the one line is")
-    print(one_line)
-    print()
+    def get_ls_output(self):
+        ls_output = check_output(['ls', '-lh']).decode().split("\n")
+        self.one_line = [x.split() for x in ls_output][1]
 
-    readable_file_name(one_line[-1])
+    def format_and_print(self):
+        self.get_ls_output()
 
-    file_type = one_line[0][0]
-    readable_file_type(file_type)
+        self._set_readable_file_name()
+        self._set_readable_file_type()
+        self._set_all_readable_perms()
+        self._set_readable_meta_data()
 
-    owner_perms = one_line[0][1:4]
-    readable_owner_perms(owner_perms)
+        print(" \n ".join(self.verbose_ls_output))
 
-    owner_group_perms = one_line[0][4:7]
-    readable_owner_group_perms(owner_group_perms)
+    def _set_readable_file_name(self):
+        filename = self.one_line[-1]
+        self._update_verbose_ls_output("Filename", filename)
 
-    other_users_perms = one_line[0][7:10]
-    readable_other_users_perms(other_users_perms)
+    def _set_readable_file_type(self):
+        file_type_code = self.one_line[0][0]
+        file_type = self.code_to_file_type[file_type_code]
+        self._update_verbose_ls_output("File Type", file_type)
 
-    readable_num_hard_links(one_line[1])
+    def _set_all_readable_perms(self):
+        perm_info = self.one_line[0]
 
-    readable_owner(one_line[2])
+        perm_codes_and_types = [
+            [perm_info[1:4], 'Owner'],
+            [perm_info[4:7], 'Group'],
+            [perm_info[7:10], 'Other Users']
+        ]
+        for perm_code_and_type in perm_codes_and_types:
+            self._set_readable_perms(perm_code_and_type[0], perm_code_and_type[1])
 
-    readable_owner_group(one_line[3])
+    def _set_readable_perms(self, perm_codes, owner_type):
+        readable_perms = []
+        for perm_code in perm_codes:
+            permission = self.code_to_file_permission.get(perm_code)
+            if permission:
+                readable_perms.append(permission)
 
-    readable_size(one_line[4])
+        readable_perms = ', '.join(readable_perms)
+        self._update_verbose_ls_output('{} Permissions'.format(owner_type), readable_perms)
 
-    readable_last_modified(" ".join(one_line[5:8]))
+    def _set_readable_meta_data(self):
+        self._update_verbose_ls_output('Hard Links', self.one_line[1])
+        self._update_verbose_ls_output('Owner', self.one_line[2])
+        self._update_verbose_ls_output('Owner Group', self.one_line[3])
+        self._update_verbose_ls_output('Size', self.one_line[4])
+        last_modified = " ".join(self.one_line[5:8])
+        self._update_verbose_ls_output('Last Modified', last_modified)
 
-    print(readable_string)
-
-
-def readable_file_name(filename):
-    global readable_string
-
-    readable_string += "Filname: {} | ".format(filename)
-
-
-def readable_file_type(file_type_code):
-    global readable_string
-
-    readable_string += decode_file_type[file_type_code]
-
-def readable_owner_perms(owner_perms):
-    global readable_string
-
-    readable_string += ' | '
-    readable_string += 'Owner can '
-
-    readable_perms = ''
-    for perm in owner_perms:
-        if decode_file_perm.get(perm):
-            readable_perms += decode_file_perm.get(perm, '')
-            readable_perms += ', '
-
-    readable_string += readable_perms
-
-
-def readable_owner_group_perms(owner_group_perms):
-    global readable_string
-
-    readable_string += ' | '
-    readable_string += 'Owner Group can '
-
-    readable_perms = ''
-    for perm in owner_group_perms:
-        if decode_file_perm.get(perm):
-            readable_perms += decode_file_perm.get(perm, '')
-            readable_perms += ', '
-
-    readable_string += readable_perms
-
-
-def readable_other_users_perms(other_users_perms):
-    global readable_string
-
-    readable_string += ' | '
-    readable_string += 'Other users can '
-
-    readable_perms = ''
-    for perm in other_users_perms:
-        if decode_file_perm.get(perm):
-            readable_perms += decode_file_perm.get(perm, '')
-            readable_perms += ', '
-
-    readable_string += readable_perms
-
-
-def readable_num_hard_links(num_hard_links):
-    global readable_string
-
-    readable_string += ' | '
-    readable_string += 'Num of hard links {}'.format(num_hard_links)
-
-
-def readable_owner(owner):
-    global readable_string
-
-    readable_string += ' | '
-    readable_string += 'Owner {}'.format(owner)
-
-
-def readable_owner_group(owner_group):
-    global readable_string
-
-    readable_string += ' | '
-    readable_string += 'Owner Group {}'.format(owner_group)
-
-
-def readable_size(size):
-    global readable_string
-
-    readable_string += ' | '
-    readable_string += 'Size {}'.format(size)
-
-def readable_last_modified(last_modified):
-    global readable_string
-
-    readable_string += ' | '
-    readable_string += 'Last Modified {}'.format(last_modified)
+    def _update_verbose_ls_output(self, title, desc):
+        self.verbose_ls_output.append("{}: {}".format(title, desc))
 
 
 if __name__ == '__main__':
-    main()
+    LSFormatter().format_and_print()
