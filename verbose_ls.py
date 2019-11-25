@@ -28,23 +28,23 @@ class LSFormatter:
     def format_and_print(self):
         self.get_ls_output()
 
-        self._set_readable_file_name()
-        self._set_readable_file_type()
-        self._set_all_readable_perms()
-        self._set_readable_meta_data()
+        self._add_readable_file_name()
+        self._add_readable_file_type()
+        self._add_all_readable_perms()
+        self._add_readable_meta_data()
 
         print(" \n ".join(self.verbose_ls_output))
 
-    def _set_readable_file_name(self):
+    def _add_readable_file_name(self):
         filename = self.one_line[-1]
         self._update_verbose_ls_output("Filename", filename)
 
-    def _set_readable_file_type(self):
+    def _add_readable_file_type(self):
         file_type_code = self.one_line[0][0]
         file_type = self.code_to_file_type[file_type_code]
         self._update_verbose_ls_output("File Type", file_type)
 
-    def _set_all_readable_perms(self):
+    def _add_all_readable_perms(self):
         perm_info = self.one_line[0]
 
         perm_codes_and_types = [
@@ -53,9 +53,9 @@ class LSFormatter:
             [perm_info[7:10], 'Other Users']
         ]
         for perm_code_and_type in perm_codes_and_types:
-            self._set_readable_perms(perm_code_and_type[0], perm_code_and_type[1])
+            self._add_readable_perms(perm_code_and_type[0], perm_code_and_type[1])
 
-    def _set_readable_perms(self, perm_codes, owner_type):
+    def _add_readable_perms(self, perm_codes, owner_type):
         readable_perms = []
         for perm_code in perm_codes:
             permission = self.code_to_file_permission.get(perm_code)
@@ -65,7 +65,7 @@ class LSFormatter:
         readable_perms = ', '.join(readable_perms)
         self._update_verbose_ls_output('{} Permissions'.format(owner_type), readable_perms)
 
-    def _set_readable_meta_data(self):
+    def _add_readable_meta_data(self):
         self._update_verbose_ls_output('Hard Links', self.one_line[1])
         self._update_verbose_ls_output('Owner', self.one_line[2])
         self._update_verbose_ls_output('Owner Group', self.one_line[3])
@@ -78,4 +78,5 @@ class LSFormatter:
 
 
 if __name__ == '__main__':
+    # TODO: support handling files as args
     LSFormatter().format_and_print()
