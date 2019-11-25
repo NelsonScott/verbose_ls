@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import argparse
 from subprocess import check_output
 
 
@@ -17,35 +18,45 @@ class LSFormatter:
         'l': 'Symlink'
     }
 
-    def __init__(self):
+    def __init__(self, files):
         self.verbose_ls_output = []
-        self.get_ls_output()
+        self._get_ls_output(files)
+        self.current_line = None
 
-    def get_ls_output(self):
-        ls_output = check_output(['ls', '-lh']).decode().split("\n")
-        self.one_line = [x.split() for x in ls_output][1]
+    def _get_ls_output(self, files):
+        if not files:
+            files = ['.']
+
+        ls_output = []
+        for file in files:
+            ls_output += check_output(['ls', '-lh', file]).decode().split("\n")
+        self.all_lines = [x.split() for x in ls_output]
+        # get rid of empty space or mac adding 'total' at top
+        self.all_lines = [y for y in self.all_lines if len(y) == 9]
 
     def format_and_print(self):
-        self.get_ls_output()
+        for line in self.all_lines:
+            self.verbose_ls_output = []
+            self.current_line = line
 
-        self._add_readable_file_name()
-        self._add_readable_file_type()
-        self._add_all_readable_perms()
-        self._add_readable_meta_data()
+            self._add_readable_file_name()
+            self._add_readable_file_type()
+            self._add_all_readable_perms()
+            self._add_readable_meta_data()
 
-        print(" \n ".join(self.verbose_ls_output))
+            print(" \n ".join(self.verbose_ls_output) + "\n")
 
     def _add_readable_file_name(self):
-        filename = self.one_line[-1]
+        filename = self.current_line[-1]
         self._update_verbose_ls_output("Filename", filename)
 
     def _add_readable_file_type(self):
-        file_type_code = self.one_line[0][0]
+        file_type_code = self.current_line[0][0]
         file_type = self.code_to_file_type[file_type_code]
         self._update_verbose_ls_output("File Type", file_type)
 
     def _add_all_readable_perms(self):
-        perm_info = self.one_line[0]
+        perm_info = self.current_line[0]
 
         perm_codes_and_types = [
             [perm_info[1:4], 'Owner'],
@@ -66,11 +77,11 @@ class LSFormatter:
         self._update_verbose_ls_output('{} Permissions'.format(owner_type), readable_perms)
 
     def _add_readable_meta_data(self):
-        self._update_verbose_ls_output('Hard Links', self.one_line[1])
-        self._update_verbose_ls_output('Owner', self.one_line[2])
-        self._update_verbose_ls_output('Owner Group', self.one_line[3])
-        self._update_verbose_ls_output('Size', self.one_line[4])
-        last_modified = " ".join(self.one_line[5:8])
+        self._update_verbose_ls_output('Hard Links', self.current_line[1])
+        self._update_verbose_ls_output('Owner', self.current_line[2])
+        self._update_verbose_ls_output('Owner Group', self.current_line[3])
+        self._update_verbose_ls_output('Size', self.current_line[4])
+        last_modified = " ".join(self.current_line[5:8])
         self._update_verbose_ls_output('Last Modified', last_modified)
 
     def _update_verbose_ls_output(self, title, desc):
@@ -78,5 +89,8 @@ class LSFormatter:
 
 
 if __name__ == '__main__':
-    # TODO: support handling files as args
-    LSFormatter().format_and_print()
+    parser = argparse.ArgumentParser(description='Verbosely Describe files.')
+    parser.add_argument('files', nargs='*')
+
+    args = parser.parse_args()
+    LSFormatter(args.files).format_and_print()
