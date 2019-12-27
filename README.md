@@ -9,8 +9,7 @@ For example, the permissions for owner, group, and other users can be hard to re
 
 For example, for the setup.py in this package:
 ```
-ls -l
-setup.py
+ls -l setup.py
 
 -rw-r--r--  1 scottnelson  staff  406 Dec 26 20:30 setup.py
 ```
