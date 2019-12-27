@@ -88,9 +88,13 @@ class LSFormatter:
         self.verbose_ls_output.append("{}: {}".format(title, desc))
 
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser(description='Verbosely Describe files.')
     parser.add_argument('files', nargs='*')
 
     args = parser.parse_args()
     LSFormatter(args.files).format_and_print()
+
+
+if __name__ == '__main__':
+    main()
