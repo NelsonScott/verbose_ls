@@ -1,7 +1,7 @@
 from os import path
 from setuptools import find_packages, setup
 
-VERSION = "0.0.4"
+VERSION = "0.1.0"
 
 this_directory = path.abspath(path.dirname(__file__))
 with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:

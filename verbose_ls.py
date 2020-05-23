@@ -14,8 +14,12 @@ class LSFormatter:
     }
     code_to_file_type = {
         '-': 'Regular file',
+        'b': 'Block special file',
+        'c': 'Character special file',
         'd': 'Directory',
-        'l': 'Symlink'
+        'l': 'Symlink',
+        'p': 'Pipe (FIFO)',
+        's': 'Socket link'
     }
 
     def __init__(self, files):
