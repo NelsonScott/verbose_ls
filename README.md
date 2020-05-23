@@ -4,6 +4,12 @@ This package aims to make the output of `ls` a little more readable and verbose.
 
 _Note_: This package should work on Linux, but has only been tested on Mac OS (Mojave).
 
+## Installation
+```
+$ pip install verbose_ls
+```
+
+## Using verbose_ls
 
 For example, the permissions for owner, group, and other users can be hard to read in the first 9 slots.  And for someone new to `ls` it may not be obvious what the other output means.  
 
